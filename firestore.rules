@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- User Rules ---
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if false; // No public user lists
+      allow create: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming());
+      allow update: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming()) 
+                     && incoming().diff(existing()).affectedKeys().hasOnly(['merchantProfile']);
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['email', 'role', 'createdAt'])
+             && data.email is string && data.email.size() <= 256
+             && data.role in ['owner', 'guest']
+             && data.createdAt == request.time;
+    }
+
+    // --- Property Rules ---
+    match /properties/{propertyId} {
+      allow get: if true; // Public listings
+      allow list: if true; // Searchable listings
+      allow create: if isSignedIn() && isValidProperty(incoming()) && incoming().ownerId == request.auth.uid;
+      allow update: if isOwner(existing().ownerId) && isValidProperty(incoming())
+                     && incoming().ownerId == existing().ownerId
+                     && (
+                       // Action: Update details
+                       incoming().diff(existing()).affectedKeys().hasOnly(['name', 'description', 'images', 'basePrice', 'otaLinks', 'amenities', 'location', 'status'])
+                     );
+      allow delete: if isOwner(existing().ownerId);
+
+      // Sub-collections
+      match /pricing_cache/{cacheId} {
+        allow read: if true; // Comparative data is public
+        allow write: if false; // System only
+      }
+
+      match /sync_logs/{logId} {
+        allow read: if isOwner(get(/databases/$(database)/documents/properties/$(propertyId)).data.ownerId);
+        allow write: if false; // System only
+      }
+    }
+
+    function isValidProperty(data) {
+      return data.keys().hasAll(['ownerId', 'name', 'basePrice', 'createdAt'])
+             && data.ownerId == request.auth.uid
+             && data.name is string && data.name.size() <= 200
+             && data.basePrice is number && data.basePrice > 0
+             && data.createdAt == (resource == null ? request.time : existing().createdAt);
+    }
+
+    // --- Booking Rules ---
+    match /bookings/{bookingId} {
+      allow get: if isSignedIn() && (request.auth.uid == resource.data.guestId || isOwner(resource.data.ownerId));
+      allow list: if isSignedIn() && (resource.data.guestId == request.auth.uid || resource.data.ownerId == request.auth.uid);
+      allow create: if isSignedIn() && isValidBooking(incoming())
+                     && exists(/databases/$(database)/documents/properties/$(incoming().propertyId));
+      allow update: if isSignedIn() && (
+        // Action: Cancel (by guest or owner)
+        ( (request.auth.uid == existing().guestId || request.auth.uid == existing().ownerId) 
+          && incoming().diff(existing()).affectedKeys().hasOnly(['status'])
+          && incoming().status == 'cancelled'
+        )
+      );
+    }
+
+    function isValidBooking(data) {
+      return data.keys().hasAll(['propertyId', 'ownerId', 'startDate', 'endDate', 'totalPrice', 'status', 'createdAt'])
+             && data.startDate is timestamp
+             && data.endDate is timestamp
+             && data.endDate > data.startDate
+             && data.totalPrice is number
+             && data.status == 'pending'
+             && data.createdAt == request.time;
+    }
+  }
+}
