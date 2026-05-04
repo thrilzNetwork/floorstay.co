@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { motion } from 'motion/react';
-import { Search, MapPin, Bed, Bath, Users, ChevronDown, Sliders, Heart, Phone, MessageSquare, Check } from 'lucide-react';
+import { Search, MapPin, Bed, Bath, Users, ChevronDown, Sliders, Heart, Phone, MessageSquare, Check, ArrowRight, Star, Shield } from 'lucide-react';
 import type { Property } from '../types';
 import { getStorefrontBySlug, getOtaComparison } from '../services/propertyService';
 import CheckoutModal from './CheckoutModal';
@@ -29,7 +28,6 @@ export default function PublicStorefront() {
       if (data) {
         setStorefront(data.owner);
         setProperties(data.properties);
-        // Load OTA comparisons for all properties
         data.properties.forEach((p: Property) => {
           getOtaComparison(p.id, 1).then(comp => {
             setComparisons(prev => ({ ...prev, [p.id]: comp }));
@@ -85,42 +83,32 @@ export default function PublicStorefront() {
     });
   }
 
+  const owner = storefront || { business_name: 'FloorStay', headline: 'Apartments for Rent in Fort Lauderdale' };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex flex-col justify-center items-center text-gray-400 gap-4">
-        <div className="w-10 h-10 border-t-2 border-blue-600 animate-spin rounded-full" />
-        <p className="text-sm">Loading properties...</p>
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center text-slate-400 gap-4">
+        <div className="w-8 h-8 border-2 border-slate-200 border-t-indigo-600 animate-spin rounded-full" />
+        <p className="text-sm font-medium">Loading properties...</p>
       </div>
     );
   }
 
-  const owner = storefront || {
-    business_name: 'FloorStay',
-    headline: 'Apartments for Rent in Fort Lauderdale',
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 text-[#141414] font-sans">
-      {/* Top Navigation Bar */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+      {/* Top Navigation */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-5 md:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-6">
-              <a href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                  FS
-                </div>
-                <span className="font-bold text-lg tracking-tight">{owner.business_name}</span>
-              </a>
-            </div>
-            {/* Right Actions */}
-            <div className="flex items-center gap-4">
-              <button className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-[#141414] transition-colors">
-                <Phone size={16} />
-                <span className="hidden sm:inline">(954) 555-0100</span>
-              </button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors">
+            <a href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white font-bold text-sm">FS</div>
+              <span className="font-bold text-lg tracking-tight text-slate-900">{owner.business_name}</span>
+            </a>
+            <div className="flex items-center gap-5">
+              <span className="hidden sm:flex items-center gap-2 text-sm font-medium text-slate-500">
+                <Phone size={15} /> (954) 555-0100
+              </span>
+              <button className="bg-slate-900 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-800 transition-colors">
                 Sign In
               </button>
             </div>
@@ -128,108 +116,100 @@ export default function PublicStorefront() {
         </div>
       </header>
 
-      {/* Search Section */}
-      <section className="bg-white border-b border-gray-200 py-6">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <h1 className="text-2xl md:text-3xl font-bold mb-6 tracking-tight">{owner.headline}</h1>
+      {/* Hero Search */}
+      <section className="bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-5 md:px-8 py-10">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 mb-2">{owner.headline}</h1>
+          <p className="text-slate-500 text-sm mb-8">{properties.length} verified properties in Fort Lauderdale, FL</p>
 
-          {/* Search Bar */}
           <div className="flex flex-col lg:flex-row gap-3">
             <div className="flex-1 relative">
-              <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search by city, neighborhood, or address..."
-                className="w-full pl-11 pr-4 py-4 rounded-xl border border-gray-300 text-sm font-medium focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                placeholder="Search city, neighborhood, or address..."
+                className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-300 text-sm font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all bg-slate-50/50 hover:bg-white"
               />
             </div>
 
-            {/* Price Range */}
             <div className="relative">
               <select
                 value={priceRange}
                 onChange={e => setPriceRange(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-xl px-4 py-4 pr-10 text-sm font-medium focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer min-w-[140px]"
+                className="appearance-none bg-white border border-slate-300 rounded-xl px-4 py-3.5 pr-10 text-sm font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none cursor-pointer min-w-[150px]"
               >
                 <option value="all">All Prices</option>
                 <option value="0-150">Under $150</option>
-                <option value="150-250">$150 - $250</option>
-                <option value="250-400">$250 - $400</option>
+                <option value="150-250">$150 – $250</option>
+                <option value="250-400">$250 – $400</option>
                 <option value="400-9999">$400+</option>
               </select>
-              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
 
-            {/* Beds */}
             <div className="relative">
               <select
                 value={bedFilter}
                 onChange={e => setBedFilter(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-xl px-4 py-4 pr-10 text-sm font-medium focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer min-w-[120px]"
+                className="appearance-none bg-white border border-slate-300 rounded-xl px-4 py-3.5 pr-10 text-sm font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none cursor-pointer min-w-[130px]"
               >
                 <option value="all">All Beds</option>
                 <option value="1">1+ Beds</option>
                 <option value="2">2+ Beds</option>
                 <option value="3">3+ Beds</option>
-                <option value="4">4+ Beds</option>
               </select>
-              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
 
-            {/* Search Button */}
-            <button className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 min-w-[120px]">
-              <Search size={18} />
-              <span className="hidden lg:inline">Search</span>
+            <button className="bg-slate-900 text-white px-8 py-3.5 rounded-xl font-semibold text-sm hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 min-w-[120px]">
+              <Search size={18} /> Search
             </button>
           </div>
 
-          {/* Filter Bar */}
           <div className="flex items-center gap-3 mt-4 flex-wrap">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-300 text-gray-600 hover:border-gray-400'}`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${showFilters ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'border-slate-300 text-slate-600 hover:border-slate-400'}`}
             >
-              <Sliders size={16} />
-              More Filters
+              <Sliders size={15} /> More Filters
             </button>
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="px-3 py-2 bg-gray-100 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-200 transition-colors"
+                className="px-3 py-2 bg-slate-100 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors"
               >
                 Clear search
               </button>
             )}
-            <span className="ml-auto text-sm text-gray-500">
-              {filteredProperties.length} {filteredProperties.length === 1 ? 'property' : 'properties'} found
+            <span className="ml-auto text-sm text-slate-400 font-medium">
+              {filteredProperties.length} {filteredProperties.length === 1 ? 'property' : 'properties'}
             </span>
           </div>
         </div>
       </section>
 
-      {/* Results Grid */}
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+      {/* Results */}
+      <main className="max-w-7xl mx-auto px-5 md:px-8 py-10">
         <div className="flex gap-8">
-          {/* List */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {filteredProperties.length === 0 ? (
               <div className="text-center py-20">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search size={28} className="text-gray-400" />
+                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                  <Search size={28} className="text-slate-300" />
                 </div>
-                <h3 className="text-xl font-bold tracking-tight mb-2">No properties match your search</h3>
-                <p className="text-gray-500 text-sm">Try adjusting your filters or search terms.</p>
+                <h3 className="text-xl font-bold tracking-tight mb-2 text-slate-900">No matches found</h3>
+                <p className="text-slate-400 text-sm">Try adjusting your filters or search terms.</p>
                 <button
                   onClick={() => { setSearchQuery(''); setPriceRange('all'); setBedFilter('all'); }}
-                  className="mt-4 text-blue-600 font-bold text-sm hover:underline"
+                  className="mt-5 text-indigo-600 font-semibold text-sm hover:underline"
                 >
                   Reset all filters
                 </button>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {filteredProperties.map(p => (
                   <ApartmentCard
                     key={p.id}
@@ -244,40 +224,41 @@ export default function PublicStorefront() {
             )}
           </div>
 
-          {/* Right Sidebar — Promo / CTA */}
+          {/* Right Sidebar */}
           <div className="hidden xl:block w-80 shrink-0">
-            <div className="sticky top-24 space-y-6">
-              {/* Direct Booking Advantage */}
-              <div className="bg-blue-600 text-white rounded-2xl p-6 space-y-4">
-                <h3 className="font-bold text-lg tracking-tight">Book Direct Advantage</h3>
-                <p className="text-blue-100 text-sm">Skip the platform fees. Book directly with property owners and save up to 15% on every stay.</p>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Check size={16} className="text-blue-200" />
-                    <span>No service fees</span>
+            <div className="sticky top-24 space-y-5">
+              {/* Direct Booking CTA */}
+              <div className="bg-slate-900 text-white rounded-2xl p-6 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Shield size={18} className="text-indigo-400" />
+                  <h3 className="font-bold text-base tracking-tight">Book Direct</h3>
+                </div>
+                <p className="text-slate-300 text-sm leading-relaxed">Skip platform fees. Book directly with verified owners and save up to 15%.</p>
+                <div className="space-y-2.5 text-sm">
+                  <div className="flex items-center gap-2.5">
+                    <Check size={14} className="text-emerald-400 shrink-0" />
+                    <span className="text-slate-200">No service fees</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Check size={16} className="text-blue-200" />
-                    <span>Best price guarantee</span>
+                  <div className="flex items-center gap-2.5">
+                    <Check size={14} className="text-emerald-400 shrink-0" />
+                    <span className="text-slate-200">Best price guarantee</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Check size={16} className="text-blue-200" />
-                    <span>Direct owner contact</span>
+                  <div className="flex items-center gap-2.5">
+                    <Check size={14} className="text-emerald-400 shrink-0" />
+                    <span className="text-slate-200">Direct owner contact</span>
                   </div>
                 </div>
               </div>
 
               {/* Contact Card */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
-                <h4 className="font-bold text-sm tracking-tight">Need Help?</h4>
-                <p className="text-gray-500 text-sm">Our team can help you find the perfect place.</p>
-                <button className="w-full flex items-center justify-center gap-2 border border-gray-300 py-3 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors">
-                  <MessageSquare size={16} />
-                  Message Us
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
+                <h4 className="font-bold text-sm tracking-tight text-slate-900">Need Help?</h4>
+                <p className="text-slate-500 text-sm">Our team can help you find the right place.</p>
+                <button className="w-full flex items-center justify-center gap-2 border border-slate-300 py-3 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-colors text-slate-700">
+                  <MessageSquare size={16} /> Message
                 </button>
-                <button className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors">
-                  <Phone size={16} />
-                  (954) 555-0100
+                <button className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-3 rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors">
+                  <Phone size={16} /> (954) 555-0100
                 </button>
               </div>
             </div>
@@ -286,11 +267,9 @@ export default function PublicStorefront() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 py-10 mt-12">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 text-center">
-          <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} {owner.business_name}. All rights reserved.
-          </p>
+      <footer className="bg-white border-t border-slate-200 py-10">
+        <div className="max-w-7xl mx-auto px-5 md:px-8 text-center">
+          <p className="text-slate-400 text-sm">© {new Date().getFullYear()} {owner.business_name}. All rights reserved.</p>
         </div>
       </footer>
 
@@ -317,122 +296,117 @@ function ApartmentCard({
   const savings = comparison?.savings || Math.round(property.base_price * 0.15);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
-    >
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300 group">
       <div className="flex flex-col md:flex-row">
         {/* Image */}
-        <div className="md:w-[320px] shrink-0 relative">
+        <div className="md:w-[300px] shrink-0 relative">
           <img
             src={property.images[0]}
             alt={property.name}
-            className="w-full h-[220px] md:h-full object-cover"
+            className="w-full h-[200px] md:h-full object-cover"
           />
-          {/* Badges over image */}
           <div className="absolute top-3 left-3 flex gap-2">
-            <span className="bg-blue-600 text-white px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider">
+            <span className="bg-slate-900/90 backdrop-blur text-white px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider">
               Verified
             </span>
-            <span className="bg-green-500 text-white px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider">
+            <span className="bg-emerald-500 text-white px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider">
               Available
             </span>
           </div>
-          {/* Favorite */}
           <button
             onClick={onToggleFavorite}
-            className="absolute top-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur hover:bg-white transition-colors"
+            className="absolute top-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur hover:bg-white transition-colors shadow-sm"
           >
-            <Heart
-              size={18}
-              className={isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-500'}
-            />
+            <Heart size={17} className={isFavorite ? 'fill-red-500 text-red-500' : 'text-slate-500'} />
           </button>
-          {/* Property count badge */}
-          <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur text-white px-3 py-1.5 rounded-lg text-xs font-bold">
-            1 of {property.images.length} Photos
+          <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur text-white px-3 py-1 rounded-lg text-[11px] font-semibold">
+            1 / {property.images.length} Photos
           </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 p-5 md:p-6 flex flex-col justify-between">
           <div className="space-y-3">
-            {/* Price + Savings */}
+            {/* Price */}
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold tracking-tight">${property.base_price}</span>
-                  <span className="text-sm text-gray-500">/night</span>
+                  <span className="text-2xl font-extrabold tracking-tight text-slate-900">${property.base_price}</span>
+                  <span className="text-sm text-slate-400 font-medium">/night</span>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-green-600 text-xs font-bold bg-green-50 px-2 py-0.5 rounded">Save ${savings}</span>
-                  <span className="text-gray-400 text-xs">vs. Airbnb/VRBO</span>
+                  <span className="text-emerald-700 text-xs font-bold bg-emerald-50 px-2 py-0.5 rounded ring-1 ring-emerald-100">Save ${savings}</span>
+                  <span className="text-slate-400 text-xs font-medium">vs. OTA platforms</span>
                 </div>
+              </div>
+              <div className="hidden sm:flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-md">
+                <Star size={13} className="fill-amber-400 text-amber-400" />
+                <span className="text-xs font-bold text-amber-700">4.9</span>
               </div>
             </div>
 
             {/* Name + Address */}
             <div>
-              <h3 className="font-bold text-lg tracking-tight hover:text-blue-600 cursor-pointer transition-colors">
+              <h3 className="font-bold text-lg tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors cursor-pointer">
                 {property.name}
               </h3>
-              <p className="text-gray-500 text-sm flex items-center gap-1 mt-0.5">
+              <p className="text-slate-500 text-sm flex items-center gap-1.5 mt-1">
                 <MapPin size={14} />
                 {property.location.address}, {property.location.city}, {property.location.state}
               </p>
             </div>
 
-            {/* Stats Row */}
-            <div className="flex items-center gap-4 py-2">
-              <div className="flex items-center gap-1.5 text-sm text-gray-700">
-                <Bed size={16} className="text-gray-400" />
-                <span className="font-bold">{property.bedrooms}</span>
-                <span className="text-gray-500">{property.bedrooms === 1 ? 'Bed' : 'Beds'}</span>
+            {/* Stats */}
+            <div className="flex items-center gap-4 py-1">
+              <div className="flex items-center gap-1.5 text-sm text-slate-600">
+                <Bed size={15} className="text-slate-400" />
+                <span className="font-bold text-slate-900">{property.bedrooms}</span>
+                <span className="text-slate-500">{property.bedrooms === 1 ? 'Bed' : 'Beds'}</span>
               </div>
-              <span className="text-gray-300">|</span>
-              <div className="flex items-center gap-1.5 text-sm text-gray-700">
-                <Bath size={16} className="text-gray-400" />
-                <span className="font-bold">{property.bathrooms}</span>
-                <span className="text-gray-500">{property.bathrooms === 1 ? 'Bath' : 'Baths'}</span>
+              <span className="text-slate-200">|</span>
+              <div className="flex items-center gap-1.5 text-sm text-slate-600">
+                <Bath size={15} className="text-slate-400" />
+                <span className="font-bold text-slate-900">{property.bathrooms}</span>
+                <span className="text-slate-500">{property.bathrooms === 1 ? 'Bath' : 'Baths'}</span>
               </div>
-              <span className="text-gray-300">|</span>
-              <div className="flex items-center gap-1.5 text-sm text-gray-700">
-                <Users size={16} className="text-gray-400" />
-                <span className="font-bold">Sleeps {property.max_guests}</span>
+              <span className="text-slate-200">|</span>
+              <div className="flex items-center gap-1.5 text-sm text-slate-600">
+                <Users size={15} className="text-slate-400" />
+                <span className="font-bold text-slate-900">Sleeps {property.max_guests}</span>
               </div>
             </div>
 
             {/* Amenities */}
             <div className="flex flex-wrap gap-1.5">
               {property.amenities.slice(0, 5).map(a => (
-                <span key={a} className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 font-medium">
+                <span key={a} className="px-2.5 py-1 bg-slate-100 rounded-md text-xs text-slate-600 font-semibold">
                   {a}
                 </span>
               ))}
               {property.amenities.length > 5 && (
-                <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-500 font-medium">
+                <span className="px-2.5 py-1 bg-slate-100 rounded-md text-xs text-slate-400 font-semibold">
                   +{property.amenities.length - 5} more
                 </span>
               )}
             </div>
           </div>
 
-          {/* CTA Row */}
-          <div className="flex items-center gap-3 mt-5 pt-4 border-t border-gray-100">
+          {/* CTA */}
+          <div className="flex items-center gap-3 mt-5 pt-5 border-t border-slate-100">
             <button
               onClick={onReserve}
-              className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-blue-700 active:scale-[0.98] transition-all"
+              className="flex-1 bg-slate-900 text-white py-3 rounded-xl font-semibold text-sm hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               Check Availability
+              <ArrowRight size={15} />
             </button>
-            <button className="flex items-center gap-2 border border-gray-300 px-4 py-3 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors">
-              <Phone size={16} />
+            <button className="flex items-center gap-2 border border-slate-300 px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+              <Phone size={15} />
               <span className="hidden sm:inline">Contact</span>
             </button>
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

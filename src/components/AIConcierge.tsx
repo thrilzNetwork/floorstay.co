@@ -42,7 +42,7 @@ export default function AIConcierge() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[60]">
+    <div className={`fixed bottom-4 z-[60] ${isPublic ? 'right-4 md:bottom-8 md:right-8' : 'left-[260px] md:left-[272px] md:bottom-6'}`}>
       <AnimatePresence>
         {isOpen && (
           <motion.div

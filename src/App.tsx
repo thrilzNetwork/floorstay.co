@@ -13,7 +13,6 @@ import { AuthProvider } from './hooks/useAuth';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isStorefront, setIsStorefront] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -27,9 +26,9 @@ function AppContent() {
 
   if (isStorefront) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-slate-50">
         <div className="fixed top-4 left-4 z-[70] hidden md:block">
-          <a href="/" className="inline-flex items-center px-3 py-2 bg-white border border-gray-200 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors">
+          <a href="/" className="inline-flex items-center px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">
             ← Back to Admin
           </a>
         </div>
@@ -40,29 +39,28 @@ function AppContent() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 text-gray-900">
+    <div className="flex h-screen bg-slate-50 text-slate-900">
       <Sidebar
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        isOpen={sidebarOpen}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
+        active={activeTab}
+        onNavigate={setActiveTab}
+        userRole="admin"
       />
 
       <main className="flex-1 min-w-0 flex flex-col">
         {/* Header */}
-        <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shrink-0 z-30">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-5 md:px-8 shrink-0 z-30">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
+              className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
             >
               <Menu size={20} />
             </button>
-            <h1 className="text-sm font-semibold text-gray-700 capitalize">{activeTab === 'dashboard' ? 'Overview' : activeTab}</h1>
+            <h1 className="text-sm font-semibold text-slate-700 capitalize">{activeTab === 'dashboard' ? 'Overview' : activeTab}</h1>
           </div>
           <button
             onClick={() => setAddModalOpen(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 transition-colors"
           >
             <Plus size={16} />
             <span className="hidden sm:inline">Add Property</span>
@@ -74,13 +72,13 @@ function AppContent() {
           <div className="fixed inset-0 z-[100] md:hidden">
             <div className="absolute inset-0 bg-black/40" onClick={() => setMobileMenuOpen(false)} />
             <div className="absolute top-0 left-0 bottom-0 w-64 bg-white shadow-xl flex flex-col p-5">
-              <p className="font-bold text-lg mb-6">FloorStay</p>
+              <p className="font-bold text-lg mb-6 text-slate-900">FloorStay</p>
               {['dashboard','properties','bookings','analytics','storefront','guidebooks'].map(t => (
                 <button
                   key={t}
                   onClick={() => { setActiveTab(t); setMobileMenuOpen(false); }}
-                  className={`text-left px-3 py-2 rounded-md text-sm font-medium capitalize mb-1 ${
-                    activeTab === t ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                  className={`text-left px-3 py-2.5 rounded-lg text-sm font-semibold capitalize mb-1 ${
+                    activeTab === t ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
                   {t === 'dashboard' ? 'Overview' : t}
@@ -91,7 +89,7 @@ function AppContent() {
         )}
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        <div className="flex-1 overflow-y-auto p-5 md:p-8">
           <div className="max-w-7xl mx-auto">
             {activeTab === 'dashboard' && <Dashboard />}
             {activeTab === 'properties' && <PropertyList />}
@@ -99,14 +97,12 @@ function AppContent() {
             {activeTab === 'analytics' && <Analytics />}
             {activeTab === 'storefront' && <StorefrontSettings />}
             {activeTab === 'guidebooks' && (
-              <div className="bg-white border border-gray-200 rounded-lg p-12 text-center text-gray-400">
+              <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400">
                 Guidebooks — coming soon.
               </div>
             )}
           </div>
         </div>
-
-        <AIConcierge />
       </main>
 
       <AddPropertyModal

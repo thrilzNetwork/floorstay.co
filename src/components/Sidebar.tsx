@@ -1,83 +1,73 @@
-import { LayoutDashboard, Building2, CalendarDays, BarChart3, Globe, BookOpen, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion } from 'motion/react';
+import { useState } from 'react';
+import { LayoutDashboard, Building2, CalendarDays, BarChart3, Globe, BookOpen, Settings, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
 
 const NAV = [
-  { id: 'dashboard',  icon: LayoutDashboard, label: 'Overview' },
-  { id: 'properties', icon: Building2,      label: 'Properties' },
-  { id: 'bookings',   icon: CalendarDays,     label: 'Bookings' },
-  { id: 'analytics',  icon: BarChart3,        label: 'Analytics' },
-  { id: 'storefront', icon: Globe,            label: 'Storefront' },
-  { id: 'guidebooks', icon: BookOpen,         label: 'Guidebooks' },
+  { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
+  { id: 'properties', label: 'Properties', icon: Building2 },
+  { id: 'bookings', label: 'Bookings', icon: CalendarDays },
+  { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+  { id: 'storefront', label: 'Storefront', icon: Globe },
+  { id: 'guidebooks', label: 'Guidebooks', icon: BookOpen },
 ];
 
 interface SidebarProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
-  isOpen: boolean;
-  onToggle: () => void;
+  active: string;
+  onNavigate: (id: string) => void;
+  userRole: 'admin' | 'owner';
 }
 
-export default function Sidebar({ activeTab, onTabChange, isOpen, onToggle }: SidebarProps) {
-  return (
-    <aside className="hidden md:flex flex-col h-screen bg-white border-r border-gray-200 shrink-0 z-50">
-      {/* Collapsible width */}
-      <motion.div
-        animate={{ width: isOpen ? 220 : 64 }}
-        transition={{ duration: 0.2 }}
-        className="h-full flex flex-col"
-      >
-        {/* Logo */}
-        <div className="flex items-center h-14 px-4 border-b border-gray-200">
-          <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center text-white text-xs font-bold mr-3">FS</div>
-          {isOpen && <span className="font-bold text-sm tracking-tight text-gray-900">FloorStay</span>}
-        </div>
+export default function Sidebar({ active, onNavigate, userRole }: SidebarProps) {
+  const [collapsed, setCollapsed] = useState(false);
 
-        {/* Nav */}
-        <nav className="flex-1 py-3 px-2 space-y-0.5">
-          {NAV.map(item => (
-            <NavItem
+  return (
+    <aside className={`flex flex-col bg-white border-r border-slate-200 transition-all duration-300 ${collapsed ? 'w-[72px]' : 'w-[240px]'} shrink-0`}>
+      {/* Logo */}
+      <div className={`flex items-center h-16 border-b border-slate-200 ${collapsed ? 'justify-center px-0' : 'px-5'}`}>
+        <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white font-bold text-sm shrink-0">
+          FS
+        </div>
+        {!collapsed && <span className="ml-2.5 font-bold text-lg tracking-tight text-slate-900 truncate">FloorStay</span>}
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 px-3 py-4 space-y-1">
+        {NAV.map(item => {
+          const isActive = active === item.id;
+          const Icon = item.icon;
+          return (
+            <button
               key={item.id}
-              icon={<item.icon size={18} strokeWidth={1.5} />}
-              label={item.label}
-              active={activeTab === item.id}
-              collapsed={!isOpen}
-              onClick={() => onTabChange(item.id)}
-            />
-          ))}
-        </nav>
+              onClick={() => onNavigate(item.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                isActive
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+            >
+              <Icon size={18} className="shrink-0" strokeWidth={isActive ? 2.5 : 2} />
+              {!collapsed && <span>{item.label}</span>}
+            </button>
+          );
+        })}
+      </nav>
 
-        {/* Bottom */}
-        <div className="p-2 border-t border-gray-200">
-          <NavItem
-            icon={<Settings size={18} strokeWidth={1.5} />}
-            label="Settings"
-            collapsed={!isOpen}
-            onClick={() => {}}
-          />
-          <button
-            onClick={onToggle}
-            className="w-full flex items-center justify-center h-8 mt-1 rounded-md hover:bg-gray-100 transition-colors text-gray-400"
-          >
-            {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-          </button>
-        </div>
-      </motion.div>
+      {/* Bottom */}
+      <div className="px-3 py-4 border-t border-slate-200 space-y-1">
+        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+          <Settings size={18} className="shrink-0" />
+          {!collapsed && <span>Settings</span>}
+        </button>
+        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+          <LogOut size={18} className="shrink-0" />
+          {!collapsed && <span>Sign Out</span>}
+        </button>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="w-full flex items-center justify-center py-2 text-slate-300 hover:text-slate-600 transition-colors"
+        >
+          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        </button>
+      </div>
     </aside>
-  );
-}
-
-function NavItem({ icon, label, active, collapsed, onClick }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] font-medium transition-colors ${
-        active
-          ? 'bg-blue-50 text-blue-600'
-          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
-      }`}
-    >
-      <span className="shrink-0">{icon}</span>
-      {!collapsed && <span className="truncate">{label}</span>}
-    </button>
   );
 }
