@@ -68,21 +68,34 @@ export default function Dashboard() {
               <h3 className="font-semibold text-slate-900 text-sm">Revenue Overview</h3>
             </div>
             <div className="p-6">
-              <div className="flex items-end gap-3 h-40 px-2 bg-slate-50/50 rounded-lg">
+              <svg viewBox="0 0 600 160" className="w-full h-40">
+                {/* Grid lines */}
+                {[40, 80, 120].map(y => (
+                  <line key={y} x1="0" y1={y} x2="600" y2={y} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4" />
+                ))}
                 {CHART_DATA.map((val, i) => {
-                  const h = Math.max((val / maxChart) * 100, 15);
+                  const barWidth = 60;
+                  const gap = (600 - CHART_DATA.length * barWidth) / (CHART_DATA.length + 1);
+                  const x = gap + i * (barWidth + gap);
+                  const barHeight = Math.max((val / maxChart) * 140, 20);
+                  const y = 160 - barHeight;
                   return (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer py-2">
-                      <div className="w-full rounded-t-lg transition-colors relative hover:opacity-90" style={{ height: `${h}%`, backgroundColor: '#1e293b' }}>
-                        <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
-                          ${(val * 120).toLocaleString()}
-                        </div>
-                      </div>
-                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">{MONTHS[i]}</span>
-                    </div>
+                    <g key={i} className="group">
+                      <rect
+                        x={x} y={y} width={barWidth} height={barHeight}
+                        rx="4" fill="#4f46e5"
+                        className="transition-all duration-300 hover:fill="#4338ca]"
+                      />
+                      {/* Tooltip on hover */}
+                      <g className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <rect x={x - 10} y={y - 28} width={barWidth + 20} height="22" rx="4" fill="#0f172a" />
+                        <text x={x + barWidth/2} y={y - 12} textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">${(val * 120).toLocaleString()}</text>
+                      </g>
+                      <text x={x + barWidth/2} y={156} textAnchor="middle" fill="#64748b" fontSize="11" fontWeight="600">{MONTHS[i]}</text>
+                    </g>
                   );
                 })}
-              </div>
+              </svg>
             </div>
           </div>
 
