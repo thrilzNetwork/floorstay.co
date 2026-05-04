@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         business_name: businessName,
         slug,
         status: 'pending'
-      });
+      } as any);
     }
   }
 

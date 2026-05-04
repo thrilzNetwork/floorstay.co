@@ -26,9 +26,9 @@ export default function Bookings() {
         .from('properties')
         .select('id, name, images');
       
-      const propsMap: Record<string, Property> = {};
-      propertiesData?.forEach(p => {
-        propsMap[p.id] = p as Property;
+      const propsMap: Record<string, any> = {};
+      (propertiesData || []).forEach((p: any) => {
+        propsMap[p.id] = p;
       });
       
       setProperties(propsMap);

@@ -6,6 +6,7 @@ import PropertyList from './components/PropertyList';
 import StorefrontSettings from './components/StorefrontSettings';
 import Bookings from './components/Bookings';
 import PublicStorefront from './components/PublicStorefront';
+import Analytics from './components/Analytics';
 import AIConcierge from './components/AIConcierge';
 import AddPropertyModal from './components/AddPropertyModal';
 import { AuthProvider } from './hooks/useAuth';
@@ -82,8 +83,9 @@ function AppContent() {
             {activeTab === 'dashboard' && <Dashboard />}
             {activeTab === 'properties' && <PropertyList />}
             {activeTab === 'bookings' && <Bookings />}
+            {activeTab === 'analytics' && <Analytics />}
             {activeTab === 'storefront' && <StorefrontSettings />}
-            {(activeTab === 'analytics' || activeTab === 'guidebooks') && (
+            {activeTab === 'guidebooks' && (
               <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                 <p className="font-serif italic">Advanced {activeTab} logic in development.</p>
               </div>
