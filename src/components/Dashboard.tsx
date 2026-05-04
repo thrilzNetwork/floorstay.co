@@ -73,7 +73,7 @@ export default function Dashboard() {
                   const h = Math.max((val / maxChart) * 100, 15);
                   return (
                     <div key={i} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer py-2">
-                      <div className="w-full bg-slate-900 hover:bg-slate-800 rounded-t-lg transition-colors relative" style={{ height: `${h}%` }}>
+                      <div className="w-full rounded-t-lg transition-colors relative hover:opacity-90" style={{ height: `${h}%`, backgroundColor: '#1e293b' }}>
                         <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
                           ${(val * 120).toLocaleString()}
                         </div>
