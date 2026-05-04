@@ -3,54 +3,74 @@ import { Property, Booking } from './types';
 export const MOCK_PROPERTIES: Property[] = [
   {
     id: 'prop_1',
-    ownerId: 'owner_1',
+    owner_id: 'owner_1',
     name: 'Metropolitan Loft',
     description: 'A sleek, industrial loft in the heart of downtown. High ceilings and panoramic city views.',
     images: ['https://picsum.photos/seed/loft/800/600'],
-    basePrice: 245,
-    otaLinks: {
+    base_price: 245,
+    cleaning_fee: 75,
+    ota_links: {
       airbnb: 'https://airbnb.com/rooms/1',
       vrbo: 'https://vrbo.com/1'
     },
-    amenities: ['Wifi', 'Kitchen', 'Workspace', 'Gym'],
+    amenities: ['WiFi', 'Kitchen', 'Workspace', 'Gym'],
     location: {
       address: '123 Main St',
-      city: 'New York',
-      country: 'USA'
+      city: 'Fort Lauderdale',
+      state: 'FL',
+      country: 'USA',
+      zip: '33301'
     },
-    status: 'active'
+    bedrooms: 2,
+    bathrooms: 2,
+    max_guests: 4,
+    status: 'active',
+    created_at: new Date().toISOString()
   },
   {
     id: 'prop_2',
-    ownerId: 'owner_1',
+    owner_id: 'owner_1',
     name: 'Serene Garden Cottage',
     description: 'Charming cottage surrounded by lush greenery. Perfect for a quiet weekend getaway.',
     images: ['https://picsum.photos/seed/cottage/800/600'],
-    basePrice: 180,
-    otaLinks: {
+    base_price: 180,
+    cleaning_fee: 50,
+    ota_links: {
       airbnb: 'https://airbnb.com/rooms/2'
     },
-    amenities: ['Wifi', 'Garden', 'Parking', 'Fireplace'],
+    amenities: ['WiFi', 'Garden', 'Parking', 'Fireplace'],
     location: {
       address: '456 Oak Lane',
-      city: 'Austin',
-      country: 'USA'
+      city: 'Fort Lauderdale',
+      state: 'FL',
+      country: 'USA',
+      zip: '33304'
     },
-    status: 'active'
+    bedrooms: 1,
+    bathrooms: 1,
+    max_guests: 2,
+    status: 'active',
+    created_at: new Date().toISOString()
   }
 ];
 
 export const MOCK_BOOKINGS: Booking[] = [
   {
     id: 'book_1',
-    propertyId: 'prop_1',
-    ownerId: 'owner_1',
-    guestEmail: 'guest@example.com',
-    startDate: new Date(),
-    endDate: new Date(Date.now() + 86400000 * 3),
-    totalPrice: 735,
+    property_id: 'prop_1',
+    owner_id: 'owner_1',
+    guest_email: 'guest@example.com',
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
+    nights: 3,
+    base_total: 735,
+    cleaning_fee: 75,
+    platform_fee_savings: 150,
+    pay_now_discount: 0,
+    total_price: 660,
     status: 'confirmed',
     source: 'direct',
-    createdAt: new Date()
-  } as any
+    payment_status: 'paid',
+    created_at: new Date().toISOString()
+  }
 ];
