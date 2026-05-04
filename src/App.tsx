@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Layout, Home, Calendar, BarChart3, Settings, Menu, X, Plus, ChevronRight, MessageSquare, TrendingDown, DollarSign } from 'lucide-react';
+import { Layout, Home, Calendar, BarChart3, Settings, Menu, X, Plus, ChevronRight, MessageSquare, TrendingDown, DollarSign, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Property, ComparisonData } from './types';
 import { MOCK_PROPERTIES } from './constants';
@@ -12,14 +12,23 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (window.location.pathname.startsWith('/s/')) {
-      setIsStorefrontView(true);
-    }
+    const handleLocationChange = () => {
+      setIsStorefrontView(window.location.pathname.startsWith('/s/'));
+    };
+    
+    handleLocationChange();
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
   }, []);
 
   if (isStorefrontView) {
     return (
       <>
+        <div className="fixed top-4 left-4 z-[70] hidden md:block">
+           <a href="/" className="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase border border-[#141414]/10 shadow-sm hover:bg-[#141414] hover:text-white transition-all">
+             ← Back to Admin
+           </a>
+        </div>
         <PublicStorefrontView />
         <AIConcierge />
       </>
@@ -76,6 +85,13 @@ export default function App() {
             active={activeTab === 'storefront'} 
             collapsed={!isSidebarOpen}
             onClick={() => setActiveTab('storefront')}
+          />
+          <NavItem 
+            icon={<BookOpen size={20} />} 
+            label="Guidebooks" 
+            active={activeTab === 'bookings'} 
+            collapsed={!isSidebarOpen}
+            onClick={() => setActiveTab('bookings')}
           />
         </nav>
 
@@ -253,6 +269,84 @@ function PublicStorefrontView() {
   const slug = window.location.pathname.split('/s/')[1];
   const [selectedBookingProperty, setSelectedBookingProperty] = useState<Property | null>(null);
 
+  // Dynamic SEO Logic
+  useEffect(() => {
+    const property = MOCK_PROPERTIES.find(p => 
+      p.name.toLowerCase().replace(/ /g, '-') === slug
+    );
+
+    if (property) {
+      document.title = `${property.name} | Official Storefront | ${property.location.city}`;
+      
+      // Meta description update
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+      }
+      
+      const amenitiesText = property.amenities.slice(0, 3).join(', ');
+      metaDesc.setAttribute('content', `Book ${property.name} in ${property.location.city} directly and save 15% on OTA fees. Features ${amenitiesText}, and more. Official site best price guaranteed.`);
+
+      // OG Tags
+      const updateTag = (selector: string, attr: string, value: string) => {
+        let tag = document.querySelector(selector);
+        if (!tag) {
+          tag = document.createElement('meta');
+          const parts = selector.split('[');
+          const prop = parts[1].split('=')[1].replace(/["'\]]/g, '');
+          tag.setAttribute(attr, prop);
+          document.head.appendChild(tag);
+        }
+        tag.setAttribute('content', value);
+      };
+
+      updateTag('meta[property="og:title"]', 'property', `${property.name} - Direct Booking`);
+      updateTag('meta[property="og:description"]', 'property', `Stay at ${property.name} in ${property.location.city}. Official direct booking storefront with no platform fees.`);
+      updateTag('meta[property="og:image"]', 'property', property.images[0]);
+
+      // Schema.org Structured Data (JSON-LD)
+      const schemaData = {
+        "@context": "https://schema.org",
+        "@type": "LodgingBusiness",
+        "name": property.name,
+        "description": `Luxury stay at ${property.name} in ${property.location.city}.`,
+        "url": window.location.href,
+        "image": property.images,
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": property.location.city,
+          "addressCountry": property.location.country
+        },
+        "priceRange": `$$$`,
+        "offers": {
+          "@type": "Offer",
+          "price": property.basePrice,
+          "priceCurrency": "USD",
+          "description": "Direct Booking Best Price Guarantee",
+          "url": window.location.href
+        }
+      };
+
+      let scriptTag = document.getElementById('json-ld-schema');
+      if (!scriptTag) {
+        scriptTag = document.createElement('script');
+        scriptTag.id = 'json-ld-schema';
+        scriptTag.setAttribute('type', 'application/ld+json');
+        document.head.appendChild(scriptTag);
+      }
+      scriptTag.textContent = JSON.stringify(schemaData);
+
+    } else {
+      // Default Storefront SEO
+      document.title = "The Elite Collection | Direct Booking Storefront";
+      // Cleanup schema if not on a specific property page
+      const scriptTag = document.getElementById('json-ld-schema');
+      if (scriptTag) scriptTag.remove();
+    }
+  }, [slug]);
+
   return (
     <div className="min-h-screen bg-[#F5F5F0] text-[#141414] font-sans selection:bg-[#141414] selection:text-white pb-32">
       {/* Immersive Hero */}
@@ -291,6 +385,10 @@ function PublicStorefrontView() {
         <div className="flex animate-marquee items-center gap-12 font-mono text-[10px] text-gray-400 font-bold uppercase tracking-widest">
           <span>Airbnb Verified Properties</span>
           <span>•</span>
+          <span>$50K Protection Shield</span>
+          <span>•</span>
+          <span>Digital Guidebooks Included</span>
+          <span>•</span>
           <span>Best Price Guarantee</span>
           <span>•</span>
           <span>Direct-to-Owner Connection</span>
@@ -302,6 +400,29 @@ function PublicStorefrontView() {
           <span>24/7 Digital Concierge</span>
         </div>
       </div>
+
+      {/* Immersive Gallery Section */}
+      <section className="px-4 md:px-8 py-10 md:py-20 max-w-7xl mx-auto">
+        <div className="mb-10 space-y-2">
+          <span className="text-[10px] font-bold tracking-widest uppercase text-blue-600">The Visuals</span>
+          <h2 className="text-3xl md:text-5xl font-medium tracking-tighter">Curated Spaces.</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 h-[500px] md:h-[700px]">
+          <div className="col-span-2 row-span-2 overflow-hidden rounded-[32px] md:rounded-[48px] relative group">
+            <img src={MOCK_PROPERTIES[0].images[0]} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Gallery 1" referrerPolicy="no-referrer" />
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
+          </div>
+          <div className="col-span-1 row-span-1 overflow-hidden rounded-[32px] md:rounded-[48px] relative group">
+            <img src={MOCK_PROPERTIES[1].images[0]} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Gallery 2" referrerPolicy="no-referrer" />
+          </div>
+          <div className="col-span-1 row-span-2 overflow-hidden rounded-[32px] md:rounded-[48px] relative group">
+            <img src={MOCK_PROPERTIES[2].images[0]} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Gallery 3" referrerPolicy="no-referrer" />
+          </div>
+          <div className="col-span-1 row-span-1 overflow-hidden rounded-[32px] md:rounded-[48px] relative group">
+            <img src={MOCK_PROPERTIES[0].images[1]} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Gallery 4" referrerPolicy="no-referrer" />
+          </div>
+        </div>
+      </section>
 
       <main className="px-4 md:px-8 py-16 md:py-32 max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
@@ -349,25 +470,35 @@ function PublicStorefrontView() {
 
 function PropertyCard({ property, onReserve }: { property: Property, onReserve: () => void }) {
   const [comparison, setComparison] = useState<any>(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(true);
 
   useEffect(() => {
-    fetch('/api/ota-price', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ propertyId: property.id })
-    }).then(res => res.json()).then(data => setComparison(data));
-  }, []);
+    // Simulate real-time scraping/syncing delay
+    const timer = setTimeout(() => {
+      fetch('/api/ota-price', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propertyId: property.id })
+      })
+      .then(res => res.json())
+      .then(data => {
+        setComparison(data);
+        setIsSyncing(false);
+      });
+    }, 1500 + Math.random() * 1000); // Random delay for "realism"
+
+    return () => clearTimeout(timer);
+  }, [property.id]);
 
   return (
     <motion.div 
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-[40px] border border-[#141414]/5 overflow-hidden flex flex-col h-full group hover:shadow-2xl hover:shadow-[#141414]/5 transition-all duration-500"
     >
       {/* Media Layer */}
       <div className="aspect-[4/3] overflow-hidden relative">
-        <img src={property.images[0]} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" referrerPolicy="no-referrer" />
+        <img src={property.images[0]} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" referrerPolicy="no-referrer" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-80 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 flex items-end p-6">
           <button 
             onClick={(e) => { e.stopPropagation(); onReserve(); }}
@@ -376,16 +507,23 @@ function PropertyCard({ property, onReserve }: { property: Property, onReserve: 
             Instant Direct Reserve <ChevronRight size={18} />
           </button>
         </div>
-        {comparison && (
-          <div className="absolute top-6 left-6 z-10 flex flex-col gap-2">
-            <span className="bg-green-500 text-white px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-lg backdrop-blur-md">
-              BEST PRICE: -15%
+        <div className="absolute top-6 left-6 z-10 flex flex-col gap-2">
+          {isSyncing ? (
+            <span className="bg-blue-500 text-white px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-lg backdrop-blur-md flex items-center gap-2">
+              <span className="w-2 h-2 bg-white rounded-full animate-ping" />
+              Syncing Prices...
             </span>
-            <span className="bg-white/90 text-[#141414] px-3 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase shadow-sm border border-gray-100 italic">
-              Verified Owner
-            </span>
-          </div>
-        )}
+          ) : (
+            <>
+              <span className="bg-green-500 text-white px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-lg backdrop-blur-md">
+                -15% BEST PRICE FOUND
+              </span>
+              <span className="bg-white/90 text-[#141414] px-3 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase shadow-sm border border-gray-100 italic">
+                Verified Direct Site
+              </span>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Content Layer */}
@@ -395,43 +533,77 @@ function PropertyCard({ property, onReserve }: { property: Property, onReserve: 
           <p className="text-gray-400 text-sm font-serif italic">{property.location.city}, {property.location.country}</p>
         </div>
 
-        {/* Google Travel Style Grid */}
-        <div className="bg-[#F9F9F7] rounded-3xl p-5 space-y-4 border border-[#141414]/5">
-          <div className="flex items-center justify-between text-[10px] font-bold tracking-widest uppercase text-gray-400 border-b border-[#141414]/5 pb-2">
-            <span>Market Option</span>
-            <span>Est. Rate</span>
+        {/* Global Price Grid (SEO Friendly) */}
+        <div className="bg-[#141414] rounded-3xl p-6 space-y-4 relative overflow-hidden text-white shadow-xl shadow-[#141414]/10">
+          {isSyncing && (
+            <div className="absolute inset-0 bg-[#141414]/80 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center gap-3">
+              <div className="w-10 h-1 border-t-2 border-blue-500 animate-spin rounded-full" />
+              <span className="font-mono text-[8px] font-bold text-gray-400 uppercase tracking-[0.3em]">Auditing OTA Prices...</span>
+            </div>
+          )}
+          
+          <div className="flex items-center justify-between text-[9px] font-bold tracking-[0.2em] uppercase text-gray-500 border-b border-white/10 pb-3">
+            <span>Marketplace Rate</span>
+            <span>Est. Total</span>
           </div>
           
-          {/* Direct Option (Highlighted) */}
-          <div className="flex items-center justify-between group/row">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              <span className="text-sm font-bold tracking-tight">Direct Booking (Official)</span>
+          {/* Direct Option */}
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="flex items-center justify-between bg-blue-600/10 border border-blue-500/30 p-3 rounded-2xl"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_12px_rgba(96,165,250,0.8)]" />
+              <span className="text-sm font-bold tracking-tight">Direct (Official Rate)</span>
             </div>
-            <span className="text-sm font-black text-blue-600 tracking-tighter">${property.basePrice}</span>
+            <div className="text-right">
+              <span className="text-lg font-black text-white tracking-tighter">${property.basePrice}</span>
+              <p className="text-[7px] text-blue-400 font-bold uppercase tracking-widest mt-0.5">Primary Winner</p>
+            </div>
+          </motion.div>
+
+          <div className="space-y-4 pt-1">
+            <div className="flex items-center justify-between opacity-40">
+              <div className="flex flex-col">
+                <span className="text-[12px] font-medium tracking-tight">Airbnb (Incl. Fees)</span>
+                <span className="text-[7px] font-bold uppercase tracking-widest text-red-400">+$45 Platform Tax</span>
+              </div>
+              <span className="text-[12px] font-medium line-through decoration-white/30">
+                ${isSyncing ? "..." : (comparison?.airbnb || property.basePrice + 45)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between opacity-40">
+              <div className="flex flex-col">
+                <span className="text-[12px] font-medium tracking-tight">VRBO (Incl. Fees)</span>
+                <span className="text-[7px] font-bold uppercase tracking-widest text-red-400">+$38 Platform Tax</span>
+              </div>
+              <span className="text-[12px] font-medium line-through decoration-white/30">
+                ${isSyncing ? "..." : (comparison?.vrbo || property.basePrice + 38)}
+              </span>
+            </div>
           </div>
 
-          {/* OTA Comparison */}
-          <div className="flex items-center justify-between opacity-50 hover:opacity-100 transition-opacity cursor-help">
-            <span className="text-[13px] font-medium tracking-tight">Airbnb (Incl. Fees)</span>
-            <span className="text-[13px] font-medium line-through decoration-[#141414]/30">${comparison?.airbnb || property.basePrice + 45}</span>
-          </div>
-          <div className="flex items-center justify-between opacity-50 hover:opacity-100 transition-opacity cursor-help">
-            <span className="text-[13px] font-medium tracking-tight">VRBO (Incl. Fees)</span>
-            <span className="text-[13px] font-medium line-through decoration-[#141414]/30">${comparison?.vrbo || property.basePrice + 38}</span>
-          </div>
-
-          <div className="pt-3 border-t border-[#141414]/5">
-            <p className="text-[10px] text-green-600 font-bold tracking-widest uppercase text-center animate-pulse">
-              You Save Approx. ${comparison?.savings} Direct
-            </p>
-          </div>
+          {!isSyncing && (
+            <div className="pt-4 border-t border-white/10">
+              <div className="flex items-center justify-between">
+                <p className="text-[9px] text-green-400 font-bold tracking-widest uppercase">
+                  Net Saving: ${comparison?.savings}
+                </p>
+                <button 
+                  onClick={onReserve}
+                  className="bg-white text-[#141414] px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-tighter active:scale-95 transition-transform"
+                >
+                  Claim Discount
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center justify-between mt-auto">
+        <div className="flex items-center justify-between mt-auto pt-4 border-t border-[#141414]/5">
           <div className="flex -space-x-2">
             {property.amenities.slice(0, 3).map((a, i) => (
-              <div key={i} className="w-8 h-8 rounded-full bg-gray-50 border-2 border-white flex items-center justify-center text-[8px] font-bold text-gray-400 uppercase tracking-tighter">
+              <div key={i} title={a} className="w-8 h-8 rounded-full bg-gray-50 border-2 border-white flex items-center justify-center text-[8px] font-bold text-gray-400 uppercase tracking-tighter cursor-help">
                 {a[0]}
               </div>
             ))}
@@ -439,9 +611,22 @@ function PropertyCard({ property, onReserve }: { property: Property, onReserve: 
               +{property.amenities.length - 3}
             </div>
           </div>
-          <button className="text-[10px] font-bold tracking-widest uppercase text-blue-600 border-b border-blue-600 flex items-center gap-1 hover:gap-2 transition-all">
-            Property Details <ChevronRight size={12} />
-          </button>
+          <div className="flex items-center gap-4">
+            <a 
+              href={`/s/${property.name.toLowerCase().replace(/ /g, '-')}`}
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState({}, '', `/s/${property.name.toLowerCase().replace(/ /g, '-')}`);
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="text-[11px] font-black tracking-tighter text-[#141414] underline underline-offset-4 decoration-2 decoration-blue-500 hover:text-blue-600 transition-colors"
+            >
+              Book Direct
+            </a>
+            <button className="text-[10px] font-bold tracking-widest uppercase text-gray-400 flex items-center gap-1 hover:text-[#141414] transition-all">
+              Details <ChevronRight size={12} />
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -450,6 +635,12 @@ function PropertyCard({ property, onReserve }: { property: Property, onReserve: 
 
 function CheckoutModal({ property, onClose }: { property: Property, onClose: () => void }) {
   const [step, setStep] = useState(1);
+  const [payNow, setPayNow] = useState(true);
+
+  const baseTotal = property.basePrice * 2;
+  const directSavings = 52; // Market Platform Fees
+  const payNowDiscount = payNow ? Math.round(baseTotal * 0.05) : 0;
+  const finalTotal = baseTotal - directSavings - payNowDiscount;
 
   return (
     <motion.div 
@@ -468,6 +659,9 @@ function CheckoutModal({ property, onClose }: { property: Property, onClose: () 
         <div className="flex-1 p-8 md:p-12 space-y-8 overflow-y-auto">
           <div className="flex justify-between items-start">
             <div className="space-y-1">
+              <div className="flex items-center gap-2 mb-1">
+                 <span className="bg-blue-600 text-white text-[8px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full">Official Channel</span>
+              </div>
               <h3 className="text-3xl font-medium tracking-tighter">Direct Reserve.</h3>
               <p className="text-sm text-gray-400 font-serif italic">Secure your stay at {property.name}</p>
             </div>
@@ -479,55 +673,88 @@ function CheckoutModal({ property, onClose }: { property: Property, onClose: () 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">Check-In</label>
-                  <input type="date" className="w-full bg-[#F5F5F0] border-none rounded-2xl px-4 py-3 text-sm font-medium" />
+                  <input type="date" defaultValue="2026-05-12" className="w-full bg-[#F5F5F0] border-none rounded-2xl px-4 py-3 text-sm font-medium" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">Check-Out</label>
-                  <input type="date" className="w-full bg-[#F5F5F0] border-none rounded-2xl px-4 py-3 text-sm font-medium" />
+                  <input type="date" defaultValue="2026-05-14" className="w-full bg-[#F5F5F0] border-none rounded-2xl px-4 py-3 text-sm font-medium" />
                 </div>
               </div>
 
-              <div className="bg-green-50 p-6 rounded-3xl border border-green-100 space-y-4">
-                <div className="flex justify-between items-center text-green-800">
-                  <span className="text-sm font-serif italic font-medium">Standard Daily Rate</span>
-                  <span className="font-bold text-lg leading-none">${property.basePrice}</span>
+              {/* Pay Now vs Pay Later */}
+              <div className="flex p-1 bg-gray-100 rounded-2xl">
+                <button 
+                  onClick={() => setPayNow(true)}
+                  className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all ${payNow ? 'bg-white shadow-sm text-[#141414]' : 'text-gray-400'}`}
+                >
+                  Pay Now (-5% Extra)
+                </button>
+                <button 
+                  onClick={() => setPayNow(false)}
+                  className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all ${!payNow ? 'bg-white shadow-sm text-[#141414]' : 'text-gray-400'}`}
+                >
+                  Pay at Arrival
+                </button>
+              </div>
+
+              <div className="bg-[#141414] text-white p-8 rounded-[32px] space-y-4 relative overflow-hidden">
+                <div className="relative z-10 space-y-4">
+                  <div className="flex justify-between items-center opacity-60">
+                    <span className="text-sm font-serif italic">2 Night Base Stay</span>
+                    <span className="font-mono">${baseTotal}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-green-400 font-bold text-xs uppercase tracking-widest">
+                    <span>Direct Advantage (No OTA Tax)</span>
+                    <span>-${directSavings}</span>
+                  </div>
+                  {payNow && (
+                    <div className="flex justify-between items-center text-blue-400 font-bold text-xs uppercase tracking-widest">
+                      <span>Early Payment Discount</span>
+                      <span>-${payNowDiscount}</span>
+                    </div>
+                  )}
+                  <div className="pt-4 border-t border-white/10 flex justify-between items-center font-black">
+                    <span className="text-sm tracking-tighter">TOTAL PRICE</span>
+                    <span className="text-3xl tracking-tighter">${finalTotal}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center text-green-600 text-[10px] font-bold tracking-widest uppercase">
-                  <span>Platform Fee Discount</span>
-                  <span>-$52.00</span>
-                </div>
-                <div className="pt-4 border-t border-green-100 flex justify-between items-center text-green-900 font-black">
-                  <span className="text-sm tracking-tighter">TOTAL PRICE (2 NIGHTS)</span>
-                  <span className="text-2xl">${property.basePrice * 2 - 52}</span>
-                </div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2" />
               </div>
 
               <button 
                 onClick={() => setStep(2)}
-                className="w-full bg-[#141414] text-white py-5 rounded-3xl font-bold tracking-tight shadow-xl hover:opacity-90 active:scale-95 transition-all text-lg"
+                className="w-full bg-blue-600 text-white py-5 rounded-3xl font-bold tracking-tight shadow-xl hover:opacity-90 active:scale-95 transition-all text-xl"
               >
-                Proceed to Secure Checkout
+                Complete Reservation
               </button>
               
-              <div className="flex items-center justify-center gap-4 text-[10px] font-bold tracking-widest uppercase text-gray-300">
-                <span className="flex items-center gap-1"><Settings size={12} /> Encrypted</span>
-                <span className="flex items-center gap-1"><Home size={12} /> Direct Contact</span>
+              <div className="flex items-center justify-center gap-4 text-[9px] font-bold tracking-widest uppercase text-gray-300">
+                <span className="flex items-center gap-1"><Settings size={12} /> SSL Secured</span>
+                <span className="flex items-center gap-1"><Home size={12} /> Best Rate Guarantee</span>
               </div>
             </div>
           ) : (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 py-10 text-center">
-              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <BarChart3 size={40} />
+              <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="relative">
+                  <BarChart3 size={48} />
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+                    <div className="w-4 h-4 bg-green-500 rounded-full" />
+                  </div>
+                </div>
               </div>
-              <h4 className="text-2xl font-bold tracking-tighter">Reservation Request Recievied.</h4>
-              <p className="text-gray-500 font-serif italic text-lg leading-relaxed">
-                The property owner will review your direct booking request within 1 hour. No payment is taken until confirmation.
-              </p>
+              <div className="space-y-2">
+                <h4 className="text-3xl font-bold tracking-tighter">Success! Direct Stay Booked.</h4>
+                <p className="text-gray-500 font-serif italic text-lg leading-relaxed">
+                  You just saved <span className="text-[#141414] font-bold">${directSavings + payNowDiscount}</span> by avoiding marketplace service fees. 
+                  A confirmation has been sent to your email.
+                </p>
+              </div>
               <button 
                 onClick={onClose}
-                className="w-full border-2 border-[#141414] text-[#141414] py-4 rounded-2xl font-bold tracking-tight hover:bg-[#141414] hover:text-white transition-all"
+                className="w-full bg-[#141414] text-white py-4 rounded-2xl font-bold tracking-tight hover:opacity-90 transition-all"
               >
-                Done
+                Return to Storefront
               </button>
             </div>
           )}
@@ -537,6 +764,18 @@ function CheckoutModal({ property, onClose }: { property: Property, onClose: () 
   );
 }
 
+
+function SyncRow({ name, status, time }: { name: string, status: string, time: string }) {
+  return (
+    <div className="flex items-center justify-between py-2 border-b border-[#141414]/5 last:border-none">
+      <div className="flex items-center gap-3">
+        <div className={`w-2 h-2 rounded-full ${status === 'Synced' ? 'bg-green-500' : 'bg-orange-400'}`} />
+        <span className="text-xs font-medium tracking-tight text-gray-700">{name}</span>
+      </div>
+      <span className="text-[10px] text-gray-400 font-mono italic">{time}</span>
+    </div>
+  );
+}
 
 function NavItem({ icon, label, active, collapsed, onClick }: any) {
   return (
@@ -559,22 +798,42 @@ function DashboardView() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 font-sans">
         <StatCard label="Revenue" value="$24,850" change="+12%" icon={<DollarSign size={18} />} />
         <StatCard label="Direct %" value="68%" change="+5%" icon={<TrendingDown size={18} />} trend="up" />
-        <StatCard label="Guests" value="12" icon={<Layout size={18} />} />
-        <StatCard label="Health" value="100%" icon={<Settings size={18} />} color="text-green-600" />
+        <StatCard label="Sync Health" value="Healthy" change="14 Nodes" icon={<Settings size={18} />} color="text-green-600" />
+        <StatCard label="Guidebook Views" value="1.2k" change="+18%" icon={<BookOpen size={18} />} color="text-blue-600" />
       </div>
 
-      {/* Comparison Engine Teaser */}
-      <div className="bg-[#141414] rounded-2xl md:rounded-3xl p-6 md:p-8 text-white relative overflow-hidden">
-        <div className="max-w-md space-y-4 relative z-10">
-          <h2 className="text-2xl md:text-3xl font-medium tracking-tight">Direct Engine Active.</h2>
-          <p className="text-gray-400 text-xs md:text-sm leading-relaxed">
-            Your storefront is currently undercutting Airbnb by an average of <span className="text-white font-bold">14%</span>. 
-          </p>
-          <button className="bg-white text-[#141414] px-5 py-2 rounded-full text-[10px] md:text-sm font-bold flex items-center gap-2 active:scale-95 transition-transform">
-            View Analytics <ChevronRight size={14} />
-          </button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Comparison Engine Teaser */}
+        <div className="lg:col-span-2 bg-[#141414] rounded-2xl md:rounded-3xl p-6 md:p-8 text-white relative overflow-hidden">
+          <div className="max-w-md space-y-4 relative z-10">
+            <h2 className="text-2xl md:text-3xl font-medium tracking-tight">Direct Engine Active.</h2>
+            <p className="text-gray-400 text-xs md:text-sm leading-relaxed">
+              Your storefront is currently undercutting Airbnb by an average of <span className="text-white font-bold">14%</span>. 
+              The SEO Engine is leeching traffic from 12 OTA listing IDs.
+            </p>
+            <div className="flex gap-4">
+              <button className="bg-white text-[#141414] px-5 py-2 rounded-full text-[10px] md:text-sm font-bold flex items-center gap-2 active:scale-95 transition-transform">
+                View Analytics <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+          <div className="absolute top-0 right-0 -translate-y-1/2 opacity-20 blur-3xl bg-blue-500 w-48 h-48 rounded-full" />
         </div>
-        <div className="absolute top-0 right-0 -translate-y-1/2 opacity-20 blur-3xl bg-blue-500 w-48 h-48 rounded-full" />
+
+        {/* Sync Center */}
+        <div className="bg-white rounded-3xl border border-[#141414]/5 p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <h4 className="font-bold text-[10px] tracking-widest uppercase text-gray-400">Channel Sync</h4>
+            <span className="flex items-center gap-1 text-green-600 font-bold text-[10px] uppercase">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse" /> Live
+            </span>
+          </div>
+          <div className="space-y-4">
+             <SyncRow name="Airbnb" status="Synced" time="2m ago" />
+             <SyncRow name="VRBO" status="Synced" time="5m ago" />
+             <SyncRow name="Booking.com" status="Connecting" time="--" />
+          </div>
+        </div>
       </div>
 
       {/* Recent Activity */}
