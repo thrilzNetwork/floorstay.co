@@ -1,4 +1,4 @@
-import { DollarSign, Building2, TrendingUp, TrendingDown, Calendar, Users, ArrowUpRight, ArrowDownRight, MoreHorizontal, Search } from 'lucide-react';
+import { DollarSign, Building2, TrendingUp, Calendar, Users, ArrowUpRight, MoreHorizontal } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { Property } from '../types';
 import { getAllProperties } from '../services/propertyService';
@@ -27,8 +27,8 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard label="Estimated Revenue" value="$0" change="+0%" icon={<DollarSign size={16} />} neutral />
         <KpiCard label="Active Properties" value={String(activeCount)} change="Real-time" icon={<Building2 size={16} />} neutral />
-        <KpiCard label="Avg Nightly Rate" value={`$${avgRate}`} change="Based on ${activeCount} units" icon={<TrendingUp size={16} />} neutral />
-        <KpiCard label="Direct Bookings" value="0" change="Connect Supabase for data" icon={<Calendar size={16} />} neutral />
+        <KpiCard label="Avg Nightly Rate" value={`$${avgRate}`} change={`Across ${activeCount} unit${activeCount === 1 ? '' : 's'}`} icon={<TrendingUp size={16} />} neutral />
+        <KpiCard label="Direct Bookings" value="0" change="Data available on connect" icon={<Calendar size={16} />} neutral />
       </div>
 
       {/* Two Column Layout */}
