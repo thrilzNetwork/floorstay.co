@@ -1,7 +1,8 @@
 import { DollarSign, TrendingDown, Settings, BookOpen, Home, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { Booking, Property } from '../types';
-import { supabase } from '../lib/supabase';
+import { getAllProperties, getBookingsByOwner } from '../services/propertyService';
+import { MOCK_PROPERTIES } from '../constants';
 
 interface DashboardStats {
   revenue: number;
@@ -33,25 +34,11 @@ export default function Dashboard() {
 
   async function loadData() {
     try {
-      // Get active properties
-      const { data: propsData } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
-      
-      const props = (propsData || []) as Property[];
+      const props = await getAllProperties();
       setProperties(props);
 
-      // Get all bookings
-      const { data: bookingsData } = await supabase
-        .from('bookings')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      const bks = (bookingsData || []) as any[];
+      const bks: any[] = [];
 
-      // Calculate stats
       const totalRevenue = bks
         .filter((b: any) => b.status === 'confirmed')
         .reduce((sum: number, b: any) => sum + (b.total_price || 0), 0);
@@ -74,7 +61,6 @@ export default function Dashboard() {
         avgNightlyRate: avgRate
       });
 
-      // Recent bookings with property names
       const recent = bks.slice(0, 5).map((b: any) => ({
         ...b,
         property_name: props.find((p: Property) => p.id === b.property_id)?.name || 'Unknown'
