@@ -19,12 +19,12 @@ const IMGS = {
   wynwood: [
     'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop',
     'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1502005097973-6a7082348d0d?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&h=600&fit=crop',
   ],
   brickell: [
     'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=800&h=600&fit=crop',
     'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1566908829550-e2601a6b9e9f?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&h=600&fit=crop',
   ],
   hollywood: [
     'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&h=600&fit=crop',
