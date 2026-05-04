@@ -1,5 +1,6 @@
 import { DollarSign, Building2, TrendingUp, Calendar, Users, ArrowUpRight, MoreHorizontal, Plus, ExternalLink, RefreshCw, Home, Wifi } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import type React from 'react';
 import type { Property } from '../types';
 import { getAllProperties } from '../services/propertyService';
 

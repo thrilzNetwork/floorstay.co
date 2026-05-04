@@ -39,22 +39,23 @@ export default function AddPropertyModal({ isOpen, onClose, onSuccess, ownerId =
   async function handleSubmit() {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: inserted, error } = await supabase
         .from('properties')
         .insert(property)
         .select()
         .single();
       
       if (error) throw error;
+      if (!inserted) throw new Error('Property insert returned no data');
       
       // Add to OTA price cache
       await supabase.from('ota_price_cache').insert({
-        property_id: data.id,
+        property_id: (inserted as any).id,
         ota: 'airbnb',
         price: property.base_price,
         fees: Math.round((property.base_price || 150) * 0.20),
         total: Math.round((property.base_price || 150) * 1.20)
-      });
+      } as any);
       
       setStep(4); // Success
       onSuccess?.();

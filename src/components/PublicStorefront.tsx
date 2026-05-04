@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import type React from 'react';
 import { Search, MapPin, Bed, Bath, Users, ChevronDown, Sliders, Heart, Phone, MessageSquare, Check, ArrowRight, Star, Shield, ChevronLeft, ChevronRight, Home, Calendar, Filter } from 'lucide-react';
 import type { Property } from '../types';
 import { getStorefrontBySlug, getOtaComparison } from '../services/propertyService';
@@ -361,6 +362,7 @@ function ApartmentCard({
   onToggleFavorite,
   onReserve
 }: {
+  key?: React.Key;
   property: Property;
   comparison: any;
   isFavorite: boolean;
@@ -370,11 +372,13 @@ function ApartmentCard({
   const savings = comparison?.savings || Math.round(property.base_price * 0.15);
   const [imgIndex, setImgIndex] = useState(0);
 
-  const nextImg = (e: React.MouseEvent) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nextImg = (e: any) => {
     e.stopPropagation();
     setImgIndex(i => (i + 1) % property.images.length);
   };
-  const prevImg = (e: React.MouseEvent) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const prevImg = (e: any) => {
     e.stopPropagation();
     setImgIndex(i => (i - 1 + property.images.length) % property.images.length);
   };

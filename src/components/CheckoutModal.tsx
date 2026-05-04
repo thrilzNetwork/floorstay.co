@@ -54,15 +54,16 @@ export default function CheckoutModal({ property, onClose }: { property: Propert
         payment_status: payNow ? 'paid' : 'pending'
       };
 
-      const { data, error } = await supabase
+      const { data: insertedBooking, error } = await supabase
         .from('bookings')
-        .insert(booking)
+        .insert(booking as any)
         .select('id')
         .single();
 
       if (error) throw error;
+      if (!insertedBooking) throw new Error('Booking insert returned no data');
       
-      setBookingId(data.id);
+      setBookingId((insertedBooking as any).id);
       setStep(3);
     } catch (err) {
       console.error('Booking creation failed:', err);
