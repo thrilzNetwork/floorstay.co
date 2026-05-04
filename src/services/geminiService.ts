@@ -1,10 +1,19 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY });
+let ai: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!ai) {
+    const key = import.meta.env?.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env?.GEMINI_API_KEY : undefined) || '';
+    ai = new GoogleGenAI({ apiKey: key });
+  }
+  return ai;
+}
 
 export async function getConciergeResponse(prompt: string, context: string, mode: 'owner' | 'guest') {
   try {
-    const response = await ai.models.generateContent({
+    const client = getAI();
+    const response = await client.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
