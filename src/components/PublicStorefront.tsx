@@ -238,16 +238,10 @@ export default function PublicStorefront() {
       {/* ===== STICKY BOTTOM CTA ===== */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 z-50 flex items-center gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <a
-          href="https://wa.me/19545550100"
-          className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors"
-        >
-          <MessageSquare size={16} /> WhatsApp Us
-        </a>
-        <a
           href="tel:+19545550100"
-          className="px-4 py-3.5 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors"
+          className="w-full bg-teal-700 hover:bg-teal-800 text-white py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors"
         >
-          <Phone size={18} />
+          <Phone size={18} /> Call Now
         </a>
       </div>
 
