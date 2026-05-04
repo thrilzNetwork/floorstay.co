@@ -93,7 +93,7 @@ export default function PublicStorefront() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       {/* ===== HEADER ===== */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -234,16 +234,6 @@ export default function PublicStorefront() {
           </div>
         )}
       </main>
-
-      {/* ===== STICKY BOTTOM CTA ===== */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 z-50 flex items-center gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        <a
-          href="tel:+19545550100"
-          className="w-full bg-teal-700 hover:bg-teal-800 text-white py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors"
-        >
-          <Phone size={18} /> Call Now
-        </a>
-      </div>
 
       {/* ===== FOOTER ===== */}
       <footer className="bg-slate-900 text-white py-10 mt-10">
