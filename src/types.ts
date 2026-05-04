@@ -101,3 +101,65 @@ export type ComparisonData = {
   savings: number;
   nights: number;
 };
+
+// ─── HOUSEKEEPING & OPERATIONS ────────────────────────────────────
+
+export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
+
+export interface Housekeeper {
+  id: string;
+  name: string;
+  role: 'lead' | 'standard' | 'deep_clean';
+  phone: string;
+  rate_per_hour: number;
+  assigned_property_ids: string[];
+  active: boolean;
+}
+
+export interface CleaningSchedule {
+  id: string;
+  property_id: string;
+  type: 'checkout_turn' | 'mid_stay' | 'deep_clean' | 'linen_swap';
+  scheduled_date: string;
+  duration_min: number;
+  staff_count: number;
+  estimated_cost: number;
+  status: 'scheduled' | 'in_progress' | 'completed' | 'missed';
+  notes?: string;
+}
+
+export interface Expense {
+  id: string;
+  property_id: string;
+  category:
+    | 'cleaning_labor'
+    | 'cleaning_supplies'
+    | 'maintenance'
+    | 'utilities'
+    | 'amenities'
+    | 'inspection'
+    | 'other';
+  amount: number;
+  description: string;
+  date: string;
+  recurring: boolean;
+}
+
+export interface PropertyOpsSummary {
+  property_id: string;
+  week_start: string;
+  // Staffing
+  cleaners_needed: number;
+  cleaners_scheduled: number;
+  // Financial
+  labor_cost: number;
+  supply_cost: number;
+  maintenance_cost: number;
+  utilities_cost: number;
+  total_ops_cost: number;
+  // Operational
+  cleanliness_score: number; // 0-100
+  issues_open: number;
+  last_serviced_date: string;
+  next_turnover_date: string;
+}
