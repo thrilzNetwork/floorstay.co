@@ -94,46 +94,95 @@ export default function PublicStorefront() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      {/* ===== HEADER ===== */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 bg-teal-700 rounded-lg flex items-center justify-center text-white">
-              <Home size={18} />
-            </div>
-            <div className="leading-tight">
-              <span className="font-bold text-sm tracking-tight text-slate-900 block">{owner.business_name}</span>
-              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider hidden sm:block">Crew Housing</span>
-            </div>
-          </a>
-
-          <div className="flex items-center gap-1">
-            <a href="tel:+19545550100" className="p-2.5 rounded-full hover:bg-slate-100 text-slate-500">
-              <Phone size={18} />
+      {/* ===== STICKY TOP BAR (header + search + filters always pinned) ===== */}
+      <div className="sticky top-0 z-50">
+        <header className="bg-white border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+            <a href="/" className="flex items-center gap-2 shrink-0">
+              <div className="w-8 h-8 bg-teal-700 rounded-lg flex items-center justify-center text-white">
+                <Home size={18} />
+              </div>
+              <div className="leading-tight">
+                <span className="font-bold text-sm tracking-tight text-slate-900 block">{owner.business_name}</span>
+                <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider hidden sm:block">Crew Housing</span>
+              </div>
             </a>
-            <a href="https://wa.me/19545550100" className="p-2.5 rounded-full hover:bg-slate-100 text-slate-500">
-              <MessageSquare size={18} />
-            </a>
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2.5 rounded-full hover:bg-slate-100 text-slate-500"
-            >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
-        </div>
 
-        {menuOpen && (
-          <div className="border-t border-slate-100 bg-white px-4 py-3 space-y-1 shadow-sm">
-            <a href="#" className="block py-2.5 text-sm font-medium text-slate-600">About Us</a>
-            <a href="#" className="block py-2.5 text-sm font-medium text-slate-600">Our Homes</a>
-            <a href="#" className="block py-2.5 text-sm font-medium text-slate-600">Locations</a>
-            <a href="#" className="block py-2.5 text-sm font-medium text-slate-600">Book Now</a>
+            <div className="flex items-center gap-1">
+              <a href="tel:+19545550100" className="p-2.5 rounded-full hover:bg-slate-100 text-slate-500">
+                <Phone size={18} />
+              </a>
+              <a href="https://wa.me/19545550100" className="p-2.5 rounded-full hover:bg-slate-100 text-slate-500">
+                <MessageSquare size={18} />
+              </a>
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="p-2.5 rounded-full hover:bg-slate-100 text-slate-500"
+              >
+                {menuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
           </div>
-        )}
-      </header>
 
-      {/* ===== COMPACT HERO ===== */}
+          {menuOpen && (
+            <div className="border-t border-slate-100 bg-white px-4 py-3 space-y-1 shadow-sm">
+              <a href="#" className="block py-2.5 text-sm font-medium text-slate-600">About Us</a>
+              <a href="#" className="block py-2.5 text-sm font-medium text-slate-600">Our Homes</a>
+              <a href="#" className="block py-2.5 text-sm font-medium text-slate-600">Locations</a>
+              <a href="#" className="block py-2.5 text-sm font-medium text-slate-600">Book Now</a>
+            </div>
+          )}
+        </header>
+
+        {/* ===== SEARCH + CITY PILLS (inside sticky wrapper) ===== */}
+        <section className="bg-white border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="relative mb-3">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search city, neighborhood..."
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 text-sm font-medium focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none bg-slate-50"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
+              <button
+                onClick={() => setCityFilter('all')}
+                className={`shrink-0 px-3.5 py-2 rounded-full text-xs font-bold border transition-colors ${
+                  cityFilter === 'all'
+                    ? 'bg-teal-700 text-white border-teal-700'
+                    : 'bg-white text-slate-600 border-slate-300'
+                }`}
+              >
+                All Cities
+              </button>
+              {cities.map(c => (
+                <button
+                  key={c}
+                  onClick={() => setCityFilter(cityFilter === c ? 'all' : c)}
+                  className={`shrink-0 px-3.5 py-2 rounded-full text-xs font-bold border transition-colors ${
+                    cityFilter === c
+                      ? 'bg-teal-700 text-white border-teal-700'
+                      : 'bg-white text-slate-600 border-slate-300'
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* ===== COMPACT HERO (scrolls away) ===== */}
       <section className="bg-teal-700 text-white">
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-10">
           <h1 className="text-xl md:text-3xl font-extrabold tracking-tight mb-2 leading-tight">
@@ -148,53 +197,6 @@ export default function PublicStorefront() {
           >
             <MessageSquare size={16} /> Message on WhatsApp
           </a>
-        </div>
-      </section>
-
-      {/* ===== SEARCH + CITY PILLS ===== */}
-      <section className="bg-white border-b border-slate-200 sticky top-14 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="relative mb-3">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search city, neighborhood..."
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 text-sm font-medium focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none bg-slate-50"
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-                <X size={16} />
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
-            <button
-              onClick={() => setCityFilter('all')}
-              className={`shrink-0 px-3.5 py-2 rounded-full text-xs font-bold border transition-colors ${
-                cityFilter === 'all'
-                  ? 'bg-teal-700 text-white border-teal-700'
-                  : 'bg-white text-slate-600 border-slate-300'
-              }`}
-            >
-              All Cities
-            </button>
-            {cities.map(c => (
-              <button
-                key={c}
-                onClick={() => setCityFilter(cityFilter === c ? 'all' : c)}
-                className={`shrink-0 px-3.5 py-2 rounded-full text-xs font-bold border transition-colors ${
-                  cityFilter === c
-                    ? 'bg-teal-700 text-white border-teal-700'
-                    : 'bg-white text-slate-600 border-slate-300'
-                }`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
         </div>
       </section>
 
