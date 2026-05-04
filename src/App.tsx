@@ -1,107 +1,120 @@
 import { useState, useEffect } from 'react';
-import { Menu, Plus } from 'lucide-react';
+import { Plus, Menu } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import PropertyList from './components/PropertyList';
-import StorefrontSettings from './components/StorefrontSettings';
 import Bookings from './components/Bookings';
-import PublicStorefront from './components/PublicStorefront';
 import Analytics from './components/Analytics';
+import StorefrontSettings from './components/StorefrontSettings';
+import PublicStorefront from './components/PublicStorefront';
 import AIConcierge from './components/AIConcierge';
 import AddPropertyModal from './components/AddPropertyModal';
 import { AuthProvider } from './hooks/useAuth';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isStorefrontView, setIsStorefrontView] = useState(false);
-  const [isAddPropertyOpen, setIsAddPropertyOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isStorefront, setIsStorefront] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
-    const checkPath = () => {
-      setIsStorefrontView(window.location.pathname.startsWith('/s/'));
-    };
-    checkPath();
-    window.addEventListener('popstate', checkPath);
-    return () => window.removeEventListener('popstate', checkPath);
+    const check = () => setIsStorefront(window.location.pathname.startsWith('/s/'));
+    check();
+    window.addEventListener('popstate', check);
+    return () => window.removeEventListener('popstate', check);
   }, []);
 
-  if (isStorefrontView) {
+  if (isStorefront) {
     return (
-      <>
+      <div className="min-h-screen bg-white">
         <div className="fixed top-4 left-4 z-[70] hidden md:block">
-          <a href="/" className="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase border border-[#141414]/10 shadow-sm hover:bg-[#141414] hover:text-white transition-all">
+          <a href="/" className="inline-flex items-center px-3 py-2 bg-white border border-gray-200 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors">
             ← Back to Admin
           </a>
         </div>
         <PublicStorefront />
         <AIConcierge />
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <div className="flex h-screen bg-[#F5F5F0] text-[#141414] font-sans overflow-hidden">
-        <Sidebar
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          isOpen={isSidebarOpen}
-          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-          isMobileOpen={isMobileMenuOpen}
-          onMobileClose={() => setIsMobileMenuOpen(false)}
-        />
+    <div className="flex h-screen bg-gray-50 text-gray-900">
+      <Sidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+      />
 
-        <main className="flex-1 overflow-y-auto relative">
-          <header className="sticky top-0 bg-[#F5F5F0]/80 backdrop-blur-md z-30 px-4 md:px-8 py-4 md:py-6 flex items-center justify-between border-b border-[#141414]/5">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsMobileMenuOpen(true)}
-                className="md:hidden p-2 bg-white border border-[#141414]/10 rounded-lg"
-              >
-                <Menu size={20} />
-              </button>
-              <div>
-                <h1 className="text-xl md:text-2xl font-medium tracking-tight capitalize leading-tight">{activeTab}</h1>
-                <p className="hidden md:block text-sm text-gray-500 italic font-serif">Welcome back, Merchant.</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={() => setIsAddPropertyOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-[#141414] text-white rounded-full text-xs md:text-sm font-medium hover:opacity-90 transition-opacity"
-              >
-                <Plus size={16} className="shrink-0" />
-                <span className="hidden sm:inline">Add Property</span>
-                <span className="sm:hidden">Add</span>
-              </button>
-            </div>
-          </header>
+      <main className="flex-1 min-w-0 flex flex-col">
+        {/* Header */}
+        <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shrink-0 z-30">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
+            >
+              <Menu size={20} />
+            </button>
+            <h1 className="text-sm font-semibold text-gray-700 capitalize">{activeTab === 'dashboard' ? 'Overview' : activeTab}</h1>
+          </div>
+          <button
+            onClick={() => setAddModalOpen(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            <Plus size={16} />
+            <span className="hidden sm:inline">Add Property</span>
+          </button>
+        </header>
 
-          <div className="p-4 md:p-8 max-w-7xl mx-auto">
+        {/* Mobile overlay */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-[100] md:hidden">
+            <div className="absolute inset-0 bg-black/40" onClick={() => setMobileMenuOpen(false)} />
+            <div className="absolute top-0 left-0 bottom-0 w-64 bg-white shadow-xl flex flex-col p-5">
+              <p className="font-bold text-lg mb-6">FloorStay</p>
+              {['dashboard','properties','bookings','analytics','storefront','guidebooks'].map(t => (
+                <button
+                  key={t}
+                  onClick={() => { setActiveTab(t); setMobileMenuOpen(false); }}
+                  className={`text-left px-3 py-2 rounded-md text-sm font-medium capitalize mb-1 ${
+                    activeTab === t ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {t === 'dashboard' ? 'Overview' : t}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="max-w-7xl mx-auto">
             {activeTab === 'dashboard' && <Dashboard />}
             {activeTab === 'properties' && <PropertyList />}
             {activeTab === 'bookings' && <Bookings />}
             {activeTab === 'analytics' && <Analytics />}
             {activeTab === 'storefront' && <StorefrontSettings />}
             {activeTab === 'guidebooks' && (
-              <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-                <p className="font-serif italic">Advanced {activeTab} logic in development.</p>
+              <div className="bg-white border border-gray-200 rounded-lg p-12 text-center text-gray-400">
+                Guidebooks — coming soon.
               </div>
             )}
           </div>
+        </div>
 
-          <AIConcierge />
-        </main>
-      </div>
+        <AIConcierge />
+      </main>
 
       <AddPropertyModal
-        isOpen={isAddPropertyOpen}
-        onClose={() => setIsAddPropertyOpen(false)}
+        isOpen={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
         onSuccess={() => setActiveTab('properties')}
       />
-    </>
+    </div>
   );
 }
 

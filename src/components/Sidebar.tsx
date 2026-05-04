@@ -1,14 +1,13 @@
-import { Layout, Home, Calendar, BarChart3, Settings, Plus, BookOpen, MessageSquare, X, Menu } from 'lucide-react';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { LayoutDashboard, Building2, CalendarDays, BarChart3, Globe, BookOpen, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion } from 'motion/react';
 
-const NAV_ITEMS = [
-  { id: 'dashboard', icon: Layout, label: 'Dashboard' },
-  { id: 'properties', icon: Home, label: 'Properties' },
-  { id: 'bookings', icon: Calendar, label: 'Bookings' },
-  { id: 'analytics', icon: BarChart3, label: 'Analytics' },
-  { id: 'storefront', icon: Plus, label: 'Storefront' },
-  { id: 'guidebooks', icon: BookOpen, label: 'Guidebooks' },
+const NAV = [
+  { id: 'dashboard',  icon: LayoutDashboard, label: 'Overview' },
+  { id: 'properties', icon: Building2,      label: 'Properties' },
+  { id: 'bookings',   icon: CalendarDays,     label: 'Bookings' },
+  { id: 'analytics',  icon: BarChart3,        label: 'Analytics' },
+  { id: 'storefront', icon: Globe,            label: 'Storefront' },
+  { id: 'guidebooks', icon: BookOpen,         label: 'Guidebooks' },
 ];
 
 interface SidebarProps {
@@ -16,31 +15,29 @@ interface SidebarProps {
   onTabChange: (tab: string) => void;
   isOpen: boolean;
   onToggle: () => void;
-  isMobileOpen: boolean;
-  onMobileClose: () => void;
 }
 
-export default function Sidebar({ activeTab, onTabChange, isOpen, onToggle, isMobileOpen, onMobileClose }: SidebarProps) {
+export default function Sidebar({ activeTab, onTabChange, isOpen, onToggle }: SidebarProps) {
   return (
-    <>
-      {/* Desktop Sidebar */}
-      <motion.aside
-        initial={false}
-        animate={{ width: isOpen ? 260 : 80 }}
-        className="hidden md:flex bg-white border-r border-[#141414]/10 flex-col z-50 shrink-0"
+    <aside className="hidden md:flex flex-col h-screen bg-white border-r border-gray-200 shrink-0 z-50">
+      {/* Collapsible width */}
+      <motion.div
+        animate={{ width: isOpen ? 220 : 64 }}
+        transition={{ duration: 0.2 }}
+        className="h-full flex flex-col"
       >
-        <div className="p-6 flex items-center justify-between border-bottom">
-          {isOpen && <span className="font-bold text-xl tracking-tighter">FloorStay.</span>}
-          <button onClick={onToggle} className="p-2 hover:bg-gray-100 rounded-lg">
-            <Menu size={20} />
-          </button>
+        {/* Logo */}
+        <div className="flex items-center h-14 px-4 border-b border-gray-200">
+          <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center text-white text-xs font-bold mr-3">FS</div>
+          {isOpen && <span className="font-bold text-sm tracking-tight text-gray-900">FloorStay</span>}
         </div>
 
-        <nav className="flex-1 mt-4 px-3 space-y-1">
-          {NAV_ITEMS.map(item => (
+        {/* Nav */}
+        <nav className="flex-1 py-3 px-2 space-y-0.5">
+          {NAV.map(item => (
             <NavItem
               key={item.id}
-              icon={<item.icon size={20} />}
+              icon={<item.icon size={18} strokeWidth={1.5} />}
               label={item.label}
               active={activeTab === item.id}
               collapsed={!isOpen}
@@ -49,54 +46,23 @@ export default function Sidebar({ activeTab, onTabChange, isOpen, onToggle, isMo
           ))}
         </nav>
 
-        <div className="p-4 mt-auto border-t border-[#141414]/5 space-y-1">
+        {/* Bottom */}
+        <div className="p-2 border-t border-gray-200">
           <NavItem
-            icon={<Settings size={20} />}
+            icon={<Settings size={18} strokeWidth={1.5} />}
             label="Settings"
             collapsed={!isOpen}
             onClick={() => {}}
           />
-        </div>
-      </motion.aside>
-
-      {/* Mobile Sidebar */}
-      <AnimatePresence>
-        {isMobileOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] md:hidden"
+          <button
+            onClick={onToggle}
+            className="w-full flex items-center justify-center h-8 mt-1 rounded-md hover:bg-gray-100 transition-colors text-gray-400"
           >
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onMobileClose} />
-            <motion.div
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              className="absolute top-0 left-0 bottom-0 w-64 bg-white shadow-xl flex flex-col p-6"
-            >
-              <div className="flex items-center justify-between mb-8">
-                <span className="font-bold text-xl tracking-tighter">FloorStay.</span>
-                <button onClick={onMobileClose} className="p-2">
-                  <X size={20} />
-                </button>
-              </div>
-              <nav className="space-y-2">
-                {NAV_ITEMS.map(item => (
-                  <NavItem
-                    key={item.id}
-                    icon={<item.icon size={20} />}
-                    label={item.label}
-                    active={activeTab === item.id}
-                    onClick={() => { onTabChange(item.id); onMobileClose(); }}
-                  />
-                ))}
-              </nav>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+            {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+          </button>
+        </div>
+      </motion.div>
+    </aside>
   );
 }
 
@@ -104,12 +70,14 @@ function NavItem({ icon, label, active, collapsed, onClick }: any) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
-        active ? 'bg-[#141414] text-white' : 'text-gray-500 hover:bg-gray-100 hover:text-[#141414]'
+      className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] font-medium transition-colors ${
+        active
+          ? 'bg-blue-50 text-blue-600'
+          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
       }`}
     >
-      <div className="shrink-0">{icon}</div>
-      {!collapsed && <span className="font-medium text-sm tracking-tight">{label}</span>}
+      <span className="shrink-0">{icon}</span>
+      {!collapsed && <span className="truncate">{label}</span>}
     </button>
   );
 }
