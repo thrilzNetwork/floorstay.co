@@ -84,7 +84,8 @@ export default function Dashboard() {
                       <rect
                         x={x} y={y} width={barWidth} height={barHeight}
                         rx="4" fill="#4f46e5"
-                        className="transition-all duration-300 hover:fill="#4338ca]"
+                        className="transition-all duration-300"
+                        style={{ transition: 'fill 0.3s' }}
                       />
                       {/* Tooltip on hover */}
                       <g className="opacity-0 group-hover:opacity-100 transition-opacity">
