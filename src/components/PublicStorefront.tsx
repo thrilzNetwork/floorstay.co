@@ -322,14 +322,6 @@ function PropertyCard({
           src={property.images[imgIndex]}
           alt={property.name}
           className="w-full h-[200px] sm:h-[220px] object-cover"
-          loading="lazy"
-          onError={(e) => {
-            const img = e.target as HTMLImageElement;
-            if (img.src.includes('unsplash.com')) {
-              // Try a guaranteed working fallback image before giving up
-              img.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop';
-            }
-          }}
         />
 
         {/* Fallback bg if image fails */}
